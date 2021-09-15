@@ -2,10 +2,12 @@ package com.tdd;
 
 public class Rides {
     private double distance, time;
+    private String rideType;
 
-    public Rides(double distanceInKm, double timeInMin){
+    public Rides(double distanceInKm, double timeInMin, String rideType){
         this.distance=distanceInKm;
         this.time=timeInMin;
+        this.rideType=rideType;
     }
 
     public double getDistance() {
@@ -14,5 +16,9 @@ public class Rides {
 
     public double getTime() {
         return time;
+    }
+
+    public String getRideType() {
+        return rideType;
     }
 }

@@ -7,8 +7,9 @@ import java.util.HashMap;
  * Invoice Generator
  */
 public class InvoiceGeneratorService {
-    private static final double RATE_PER_KM = 10.0, RATE_PER_MIN = 1.0;
-    private static final int MIN_RATE = 5;
+    private static final double RATE_PER_KM_NORMAL = 10.0, RATE_PER_MIN_NORMAL = 1.0;
+    private static final double RATE_PER_KM_PREMIUM = 15.0, RATE_PER_MIN_PREMIUM = 2.0;
+    private static final int MIN_RATE_NORMAL = 5,MIN_RATE_PREMIUM = 20;
 
     private static ArrayList<Rides> rides;
     private static HashMap<String, ArrayList<Rides>> userRidesMap;
@@ -22,16 +23,20 @@ public class InvoiceGeneratorService {
         System.out.println("Welcome to cab invoice generator!");
     }
 
-    public double calculateFare(Rides ride) {
-        double totalFare = RATE_PER_KM * ride.getDistance() + RATE_PER_MIN * ride.getTime();
-        return MIN_RATE > totalFare ? MIN_RATE : totalFare;
+    public double calculateFare(Rides ride,String rideType) {
+        double ratePerKm = rideType.equals("NORMAL")?RATE_PER_KM_NORMAL:RATE_PER_KM_PREMIUM;
+        double ratePerMin = rideType.equals("NORMAL")?RATE_PER_MIN_NORMAL:RATE_PER_MIN_PREMIUM;
+        double minRate = rideType.equals("NORMAL")?MIN_RATE_NORMAL:MIN_RATE_PREMIUM;
+
+        double totalFare = ratePerKm * ride.getDistance() + ratePerMin * ride.getTime();
+        return Math.max(minRate,totalFare);
     }
 
     public double calculateAggregateFare(String userId) throws Exception {
         double fare = 0.0;
         if(getUserRidesMap().containsKey(userId)){
             for (Rides ride : getUserRidesMap().get(userId)) {
-                fare += calculateFare(ride);
+                fare += calculateFare(ride,ride.getRideType());
             }
         } else{
             throw new Exception("Invalid User Id");
@@ -61,10 +66,12 @@ public class InvoiceGeneratorService {
         }
     }
 
-    public String showRideList(String userId) throws Exception {
+    public String showRideList(String userId) {
         StringBuilder showRideDetails = new StringBuilder();
         showRideDetails.append("User Id:").append(userId);
         for (Rides ride : userRidesMap.get(userId)) {
+            showRideDetails.append("\tType: ");
+            showRideDetails.append(ride.getRideType());
             showRideDetails.append("\nDistance: ");
             showRideDetails.append(ride.getDistance());
             showRideDetails.append("\tTime: ");
